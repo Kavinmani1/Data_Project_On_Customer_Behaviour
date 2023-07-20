@@ -1,0 +1,240 @@
+[training@localhost ~]$  mysql --user=training --password=training 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 12
+Server version: 5.1.66 Source distribution
+
+Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> use outcome1;
+Database changed
+mysql> create table customer( userID INT AUTO_INCREMENT PRIMARY key , timestamp datetime, page varchar(100));
+Query OK, 0 rows affected (0.04 sec)
+
+mysql> LOAD DATA local INFILE '/home/training/Downloads/customer.csv' INTO TABLE customer fields terminated by ','lines terminated by '\n' IGNORE 1 lines; 
+Query OK, 5 rows affected, 5 warnings (0.00 sec)
+Records: 5  Deleted: 0  Skipped: 0  Warnings: 5
+
+mysql> select userid from customer;
++--------+
+| userid |
++--------+
+|      1 |
+|      2 |
+|      3 |
+|      4 |
+|      5 |
++--------+
+5 rows in set (0.00 sec)
+
+mysql> create table click_stream(userID int,timestamp datetime,page varchar(255));
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> LOAD DATA INFILE '/home/training/Downloads/click.csv' INTO TABLE click_stream FIELDS TERMINATED BY ','  LINES TERMINATED BY '\n' IGNORE 1 LINES;
+Query OK, 13 rows affected (0.00 sec)
+Records: 13  Deleted: 0  Skipped: 0  Warnings: 0
+
+mysql> select * from click_stream;
++--------+---------------------+----------------+
+| userID | timestamp           | page           |
++--------+---------------------+----------------+
+      |1 | 2023-01-01 10:00:00 | homepage
+  |    1 | 2023-01-01 10:01:00 | product_page
+      |2 | 2023-01-01 10:02:00 | homepage
+     | 2 | 2023-01-01 10:03:00 | cart_page
+      |3 | 2023-01-01 10:05:00 | homepage
+  |    3 | 2023-01-01 10:06:00 | product_page
+     | 3 | 2023-01-01 10:07:00 | cart_page
+      |4 | 2023-01-01 10:09:00 | homepage
+  |    4 | 2023-01-01 10:10:00 | product_page
+     | 4 | 2023-01-01 10:11:00 | cart_page
+ |     4 | 2023-01-01 10:12:00 | checkout_page
+      |5 | 2023-01-01 10:15:00 | homepage
+|      5 | 2023-01-01 10:16:00 | product_page   |
++--------+---------------------+----------------+
+13 rows in set (0.00 sec)
+
+mysql> CREATE TABLE purchase (   userID INT AUTO_INCREMENT PRIMARY key ,timestamp DATETIME,amount DECIMAL(10,2) );
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> load  DATA INFILE '/home/training/Downloads/purchase.csv' INTO TABLE purchase FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n' IGNORE 1 LINES;
+Query OK, 5 rows affected (0.00 sec)
+Records: 5  Deleted: 0  Skipped: 0  Warnings: 0
+
+mysql> select * from purchase;
++--------+---------------------+--------+
+| userID | timestamp           | amount |
++--------+---------------------+--------+
+|      1 | 2023-01-01 10:05:00 | 100.00 |
+|      2 | 2023-01-01 10:08:00 | 150.00 |
+|      3 | 2023-01-01 10:09:00 | 200.00 |
+|      4 | 2023-01-01 10:13:00 | 120.00 |
+|      5 | 2023-01-01 10:17:00 |  80.00 |
++--------+---------------------+--------+
+5 rows in set (0.00 sec)
+
+
+mysql> show tables;
++--------------------+
+| Tables_in_outcome1 |
++--------------------+
+| click_stream       |
+| customer           |
+| purchase           |
++--------------------+
+3 rows in set (0.00 sec)
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| hue                |
+| metastore          |
+| movielens          |
+| mysql              |
+| outcome1           |
+| test               |
+| training           |
++--------------------+
+8 rows in set (0.00 sec)
+
+[training@localhost ~]$ sqoop import --connect jdbc:mysql://localhost/outcome1 --table purchase --fields-terminated-by '\t' --username training --password training
+23/07/16 19:29:59 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+23/07/16 19:29:59 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+23/07/16 19:29:59 INFO tool.CodeGenTool: Beginning code generation
+23/07/16 19:30:00 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `purchase` AS t LIMIT 1
+23/07/16 19:30:00 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `purchase` AS t LIMIT 1
+23/07/16 19:30:00 INFO orm.CompilationManager: HADOOP_HOME is /usr/lib/hadoop
+Note: /tmp/sqoop-training/compile/770f7b0eaa2e55ad4c5e6456c17db6a1/purchase.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+23/07/16 19:30:05 INFO orm.CompilationManager: Writing jar file: /tmp/sqoop-training/compile/770f7b0eaa2e55ad4c5e6456c17db6a1/purchase.jar
+23/07/16 19:30:06 WARN manager.MySQLManager: It looks like you are importing from mysql.
+23/07/16 19:30:06 WARN manager.MySQLManager: This transfer can be faster! Use the --direct
+23/07/16 19:30:06 WARN manager.MySQLManager: option to exercise a MySQL-specific fast path.
+23/07/16 19:30:06 INFO manager.MySQLManager: Setting zero DATETIME behavior to convertToNull (mysql)
+23/07/16 19:30:08 INFO mapreduce.ImportJobBase: Beginning import of purchase
+23/07/16 19:30:11 WARN mapred.JobClient: Use GenericOptionsParser for parsing the arguments. Applications should implement Tool for the same.
+23/07/16 19:30:16 INFO db.DataDrivenDBInputFormat: BoundingValsQuery: SELECT MIN(`userID`), MAX(`userID`) FROM `purchase`
+23/07/16 19:30:18 INFO mapred.JobClient: Running job: job_202307161835_0001
+23/07/16 19:30:19 INFO mapred.JobClient:  map 0% reduce 0%
+23/07/16 19:30:38 INFO mapred.JobClient:  map 50% reduce 0%
+23/07/16 19:30:52 INFO mapred.JobClient:  map 100% reduce 0%
+23/07/16 19:31:01 INFO mapred.JobClient: Job complete: job_202307161835_0001
+23/07/16 19:31:02 INFO mapred.JobClient: Counters: 23
+23/07/16 19:31:02 INFO mapred.JobClient:   File System Counters
+23/07/16 19:31:02 INFO mapred.JobClient:     FILE: Number of bytes read=0
+23/07/16 19:31:02 INFO mapred.JobClient:     FILE: Number of bytes written=796780
+23/07/16 19:31:02 INFO mapred.JobClient:     FILE: Number of read operations=0
+23/07/16 19:31:02 INFO mapred.JobClient:     FILE: Number of large read operations=0
+23/07/16 19:31:02 INFO mapred.JobClient:     FILE: Number of write operations=0
+23/07/16 19:31:02 INFO mapred.JobClient:     HDFS: Number of bytes read=425
+23/07/16 19:31:02 INFO mapred.JobClient:     HDFS: Number of bytes written=154
+23/07/16 19:31:02 INFO mapred.JobClient:     HDFS: Number of read operations=4
+23/07/16 19:31:02 INFO mapred.JobClient:     HDFS: Number of large read operations=0
+23/07/16 19:31:02 INFO mapred.JobClient:     HDFS: Number of write operations=4
+23/07/16 19:31:02 INFO mapred.JobClient:   Job Counters 
+23/07/16 19:31:02 INFO mapred.JobClient:     Launched map tasks=4
+23/07/16 19:31:02 INFO mapred.JobClient:     Total time spent by all maps in occupied slots (ms)=62780
+23/07/16 19:31:02 INFO mapred.JobClient:     Total time spent by all reduces in occupied slots (ms)=0
+23/07/16 19:31:02 INFO mapred.JobClient:     Total time spent by all maps waiting after reserving slots (ms)=0
+23/07/16 19:31:02 INFO mapred.JobClient:     Total time spent by all reduces waiting after reserving slots (ms)=0
+23/07/16 19:31:02 INFO mapred.JobClient:   Map-Reduce Framework
+23/07/16 19:31:02 INFO mapred.JobClient:     Map input records=5
+23/07/16 19:31:02 INFO mapred.JobClient:     Map output records=5
+23/07/16 19:31:02 INFO mapred.JobClient:     Input split bytes=425
+23/07/16 19:31:02 INFO mapred.JobClient:     Spilled Records=0
+23/07/16 19:31:02 INFO mapred.JobClient:     CPU time spent (ms)=7960
+23/07/16 19:31:02 INFO mapred.JobClient:     Physical memory (bytes) snapshot=341426176
+23/07/16 19:31:02 INFO mapred.JobClient:     Virtual memory (bytes) snapshot=1610211328
+23/07/16 19:31:02 INFO mapred.JobClient:     Total committed heap usage (bytes)=254803968
+23/07/16 19:31:02 INFO mapreduce.ImportJobBase: Transferred 0 bytes in 52.5254 seconds (0 bytes/sec)
+23/07/16 19:31:02 INFO mapreduce.ImportJobBase: Retrieved 5 records.
+[training@localhost ~]$ sqoop eval --connect jdbc:mysql://localhost/outcome1 --username training --password training --query "select * from purchase where userid > 2 
+> ^C
+[training@localhost ~]$ sqoop eval --connect jdbc:mysql://localhost/outcome1 --username training --password training --query "select * from purchase where userid > 2 ;
+> ^C
+[training@localhost ~]$ sqoop eval --connect jdbc:mysql://localhost/outcome1 --username training --password training --query "select * from purchase where userid > 2 "
+23/07/16 19:34:48 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+23/07/16 19:34:49 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+----------------------------------------------------
+| userID      | timestamp           | amount       | 
+----------------------------------------------------
+| 3           | 2023-01-01 10:09:00.0 | 200.00       | 
+| 4           | 2023-01-01 10:13:00.0 | 120.00       | 
+| 5           | 2023-01-01 10:17:00.0 | 80.00        | 
+----------------------------------------------------
+upied slots (ms)=38124
+23/07/17 11:14:27 INFO mapred.JobClient:     Total time spent by all reduces in occupied slots (ms)=0
+23/07/17 11:14:27 INFO mapred.JobClient:     Total time spent by all maps waiting after reserving slots (ms)=0
+23/07/17 11:14:27 INFO mapred.JobClient:     Total time spent by all reduces waiting after reserving slots (ms)=0
+23/07/17 11:14:27 INFO mapred.JobClient:   Map-Reduce Framework
+23/07/17 11:14:27 INFO mapred.JobClient:     Map input records=5
+23/07/17 11:14:27 INFO mapred.JobClient:     Map output records=5
+23/07/17 11:14:27 INFO mapred.JobClient:     Input split bytes=425
+23/07/17 11:14:27 INFO mapred.JobClient:     Spilled Records=0
+23/07/17 11:14:27 INFO mapred.JobClient:     CPU time spent (ms)=6380
+23/07/17 11:14:27 INFO mapred.JobClient:     Physical memory (bytes) snapshot=342663168
+23/07/17 11:14:27 INFO mapred.JobClient:     Virtual memory (bytes) snapshot=1610452992
+23/07/17 11:14:27 INFO mapred.JobClient:     Total committed heap usage (bytes)=271450112
+23/07/17 11:14:28 INFO mapreduce.ImportJobBase: Transferred 0 bytes in 28.77 seconds (0 bytes/sec)
+23/07/17 11:14:28 INFO mapreduce.ImportJobBase: Retrieved 5 records.
+[training@localhost ~]$  sqoop import --connect jdbc:mysql://localhost/o^Ccome1 --table customer --fields-terminated-by '\t' --username training --password training "select * from customer";
+[training@localhost ~]$  sqoop import --connect jdbc:mysql://localhost/outcome1 --table click_stream --fields-terminated-by '\t' --username training --password training
+23/07/17 11:29:41 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+23/07/17 11:29:41 INFO manager.MySQLManager: Preparing to use a MySQL streaming resultset.
+23/07/17 11:29:41 INFO tool.CodeGenTool: Beginning code generation
+23/07/17 11:29:41 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `click_stream` AS t LIMIT 1
+23/07/17 11:29:41 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM `click_stream` AS t LIMIT 1
+23/07/17 11:29:41 INFO orm.CompilationManager: HADOOP_HOME is /usr/lib/hadoop
+Note: /tmp/sqoop-training/compile/00e9a0e53a73f0e21b1d68db54059472/click_stream.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+23/07/17 11:29:44 INFO orm.CompilationManager: Writing jar file: /tmp/sqoop-training/compile/00e9a0e53a73f0e21b1d68db54059472/click_stream.jar
+23/07/17 11:29:44 WARN manager.MySQLManager: It looks like you are importing from mysql.
+23/07/17 11:29:44 WARN manager.MySQLManager: This transfer can be faster! Use the --direct
+23/07/17 11:29:44 WARN manager.MySQLManager: option to exercise a MySQL-specific fast path.
+23/07/17 11:29:44 INFO manager.MySQLManager: Setting zero DATETIME behavior to convertToNull (mysql)
+23/07/17 11:29:44 INFO mapreduce.ImportJobBase: Beginning import of click_stream
+23/07/17 11:29:46 WARN mapred.JobClient: Use GenericOptionsParser for parsing the arguments. Applications should implement Tool for the same.
+23/07/17 11:29:47 INFO db.DataDrivenDBInputFormat: BoundingValsQuery: SELECT MIN(`timestamp`), MAX(`timestamp`) FROM `click_stream`
+23/07/17 11:29:48 INFO mapred.JobClient: Running job: job_202307170635_0009
+23/07/17 11:29:49 INFO mapred.JobClient:  map 0% reduce 0%
+23/07/17 11:30:02 INFO mapred.JobClient:  map 50% reduce 0%
+23/07/17 11:30:10 INFO mapred.JobClient:  map 100% reduce 0%
+23/07/17 11:30:13 INFO mapred.JobClient: Job complete: job_202307170635_0009
+23/07/17 11:30:13 INFO mapred.JobClient: Counters: 23
+23/07/17 11:30:13 INFO mapred.JobClient:   File System Counters
+23/07/17 11:30:13 INFO mapred.JobClient:     FILE: Number of bytes read=0
+23/07/17 11:30:13 INFO mapred.JobClient:     FILE: Number of bytes written=796836
+23/07/17 11:30:13 INFO mapred.JobClient:     FILE: Number of read operations=0
+23/07/17 11:30:13 INFO mapred.JobClient:     FILE: Number of large read operations=0
+23/07/17 11:30:13 INFO mapred.JobClient:     FILE: Number of write operations=0
+23/07/17 11:30:13 INFO mapred.JobClient:     HDFS: Number of bytes read=625
+23/07/17 11:30:13 INFO mapred.JobClient:     HDFS: Number of bytes written=465
+23/07/17 11:30:13 INFO mapred.JobClient:     HDFS: Number of read operations=4
+23/07/17 11:30:13 INFO mapred.JobClient:     HDFS: Number of large read operations=0
+23/07/17 11:30:13 INFO mapred.JobClient:     HDFS: Number of write operations=4
+23/07/17 11:30:13 INFO mapred.JobClient:   Job Counters 
+23/07/17 11:30:13 INFO mapred.JobClient:     Launched map tasks=4
+23/07/17 11:30:13 INFO mapred.JobClient:     Total time spent by all maps in occupied slots (ms)=38647
+23/07/17 11:30:13 INFO mapred.JobClient:     Total time spent by all reduces in occupied slots (ms)=0
+23/07/17 11:30:13 INFO mapred.JobClient:     Total time spent by all maps waiting after reserving slots (ms)=0
+23/07/17 11:30:13 INFO mapred.JobClient:     Total time spent by all reduces waiting after reserving slots (ms)=0
+23/07/17 11:30:13 INFO mapred.JobClient:   Map-Reduce Framework
+23/07/17 11:30:13 INFO mapred.JobClient:     Map input records=13
+23/07/17 11:30:13 INFO mapred.JobClient:     Map output records=13
+23/07/17 11:30:13 INFO mapred.JobClient:     Input split bytes=625
+23/07/17 11:30:13 INFO mapred.JobClient:     Spilled Records=0
+23/07/17 11:30:13 INFO mapred.JobClient:     CPU time spent (ms)=6520
+23/07/17 11:30:13 INFO mapred.JobClient:     Physical memory (bytes) snapshot=351084544
+23/07/17 11:30:13 INFO mapred.JobClient:     Virtual memory (bytes) snapshot=1622122496
+23/07/17 11:30:13 INFO mapred.JobClient:     Total committed heap usage (bytes)=254803968
+23/07/17 11:30:13 INFO mapreduce.ImportJobBase: Transferred 0 bytes in 28.6798 seconds (0 bytes/sec)
+23/07/17 11:30:13 INFO mapreduce.ImportJobBase: Retrieved 13 records.
+
+

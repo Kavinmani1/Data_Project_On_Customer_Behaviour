@@ -1,0 +1,127 @@
+[training@localhost ~]$ hive;
+Logging initialized using configuration in file:/etc/hive/conf.dist/hive-log4j.properties
+Hive history file=/tmp/training/hive_job_log_training_202307170914_63952548.txt
+
+hive> show databases; 
+OK
+default
+hive
+Time taken: 5.923 seconds
+hive> use hive;
+OK
+Time taken: 0.026 seconds
+hive> show tables;
+OK
+my_hive_table
+Time taken: 0.347 seconds
+hive> describe my_hive_table;
+OK
+userid	int	
+d	timestamp	
+page	string	
+Time taken: 0.216 seconds
+
+hive> [training@localhost ~]$ hive
+Logging initialized using configuration in file:/etc/hive/conf.dist/hive-log4j.properties
+Hive history file=/tmp/training/hive_job_log_training_202307170921_250777854.txt
+hive> use hive;                                                                                             
+OK
+Time taken: 0.032 seconds
+hive> create table click( userID INT , d timestamp, page string);   
+OK
+Time taken: 2.53 seconds
+
+hive> create table customer( userID INT , name string, email string);
+OK
+Time taken: 2.53 seconds
+
+hive> CREATE TABLE purchase (userID int,`timestamp` TIMESTAMP,amount int)
+OK
+Time taken: 2.53 seconds
+
+
+hive> select count (*) from click;       
+Total MapReduce jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_202307170635_0002, Tracking URL = http://0.0.0.0:50030/jobdetails.jsp?jobid=job_202307170635_0002
+Kill Command = /usr/lib/hadoop/bin/hadoop job  -Dmapred.job.tracker=0.0.0.0:8021 -kill job_202307170635_0002
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2023-07-17 09:56:49,500 Stage-1 map = 0%,  reduce = 0%
+2023-07-17 09:56:55,635 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.75 sec
+2023-07-17 09:56:56,669 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.75 sec
+2023-07-17 09:56:57,691 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.75 sec
+2023-07-17 09:56:58,724 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.75 sec
+2023-07-17 09:56:59,755 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.75 sec
+2023-07-17 09:57:00,788 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.75 sec
+2023-07-17 09:57:01,833 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.75 sec
+2023-07-17 09:57:02,860 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 5.01 sec
+2023-07-17 09:57:03,884 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 5.01 sec
+2023-07-17 09:57:04,925 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 5.01 sec
+2023-07-17 09:57:05,949 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 5.01 sec
+2023-07-17 09:57:06,968 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 5.01 sec
+MapReduce Total cumulative CPU time: 5 seconds 10 msec
+Ended Job = job_202307170635_0002
+MapReduce Jobs Launched: 
+Job 0: Map: 1  Reduce: 1   Cumulative CPU: 5.01 sec   HDFS Read: 0 HDFS Write: 0 SUCCESS
+Total MapReduce CPU Time Spent: 5 seconds 10 msec
+OK
+13
+Time taken: 26.915 seconds
+hive> select * from purchase;                                              
+OK
+1	2023-01-01 10:05:00.0	100
+2	2023-01-01 10:08:00.0	150
+3	2023-01-01 10:09:00.0	200
+4	2023-01-01 10:13:00.0	120
+5	2023-01-01 10:17:00.0	80
+Time taken: 0.392 seconds
+hive> [training@localhost ~]$ hive
+Logging initialized using configuration in file:/etc/hive/conf.dist/hive-log4j.properties
+Hive history file=/tmp/training/hive_job_log_training_202307171054_2133804464.txt
+hive> use hive;
+OK
+Time taken: 4.442 seconds
+hive> select * from purchase;
+OK
+1	2023-01-01 10:05:00.0	100
+2	2023-01-01 10:08:00.0	150
+3	2023-01-01 10:09:00.0	200
+4	2023-01-01 10:13:00.0	120
+5	2023-01-01 10:17:00.0	80
+Time taken: 3.195 seconds
+hive> select * from click_stream;                                          
+FAILED: SemanticException [Error 10001]: Line 1:14 Table not found 'click_stream'
+hive> select * from click;        
+OK
+1	2023-01-01 10:00:00	homepage
+1	2023-01-01 10:01:00	product_page
+2	2023-01-01 10:02:00	homepage
+2	2023-01-01 10:03:00	cart_page
+3	2023-01-01 10:05:00	homepage
+3	2023-01-01 10:06:00	product_page
+3	2023-01-01 10:07:00	cart_page
+4	2023-01-01 10:09:00	homepage
+4	2023-01-01 10:10:00	product_page
+4	2023-01-01 10:11:00	cart_page
+4	2023-01-01 10:12:00	checkout_page
+5	2023-01-01 10:15:00	homepage
+5	2023-01-01 10:16:00	product_page
+Time taken: 0.22 seconds
+Time taken: 0.295 seconds
+hive> select * from customer;                                              
+OK
+1	John Doe	john.doe@example.com
+2	Jane Smith	jane.smith@example.com
+3	Robert Johnson	robert.johnson@example.com
+4	Lisa Brown	lisa.brown@example.com
+5	Michael Wilson	michael.wilson@example.com
+Time taken: 0.156 seconds
+
+
